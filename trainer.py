@@ -24,23 +24,24 @@ def load_data():
 
     return (train_images, train_labels, test_images, test_labels)
 
-def train_mnist(data):
+def train_mnist(hpset):
     """
     Ref: https://victorzhou.com/blog/keras-neural-network-tutorial/
     """
     from tensorflow.keras.models import Sequential
     from tensorflow.keras.layers import Dense
 
-    train_images, train_labels, test_images, test_labels = data
+    train_images, train_labels, test_images, test_labels = load_data()
+
 
     model = Sequential([
-      Dense(64, activation='relu', input_shape=(784,)),
-      Dense(64, activation='relu'),
+      Dense(hpset["layer1_nodes"], activation='relu', input_shape=(784,)),
+      Dense(hpset["layer2_nodes"], activation='relu'),
       Dense(10, activation='softmax'),
     ])
 
     model.compile(
-      optimizer='adam',
+      optimizer=hpset["optimizer"],
       loss='categorical_crossentropy',
       metrics=['accuracy'],
     )
@@ -50,13 +51,15 @@ def train_mnist(data):
       train_labels,
       epochs=1,
       batch_size=32,
+      verbose=0
     )
 
-    metrics = model.evaluate(
+    logs = model.evaluate(
       test_images,
-      test_labels
+      test_labels,
+      verbose=0
     )
 
-    accuracy = metrics[1]
+    accuracy = logs[1]
 
-    return accuracy
+    return (hpset, accuracy, logs)
